@@ -132,8 +132,10 @@ public class ContactRelatedListController {
 				contactsToInsert.add (rowContext.contactContext);
 
 		// Insert the new Contact if there are any new ones
-		if (!contactsToInsert.isEmpty ())
+		if (!contactsToInsert.isEmpty ()) {
 			Database.insert (contactsToInsert);
+			userFeedback = '';
+		}
 
 		// Reset hasNewRows so the additional add button is not shown
 		if (hasNewRows)
