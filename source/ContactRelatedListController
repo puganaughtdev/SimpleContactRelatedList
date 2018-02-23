@@ -1,0 +1,177 @@
+/**
+ *    @Who		Daniel Edwards (PuganaughtDev)
+ *    @What 	StandardController for ContactRelatedList VisualForce page
+ *	  @When 	21/02/2018
+ */
+
+public class ContactRelatedListController {
+    
+    /*
+	 * Ids
+     */
+	private final Id accountId;
+
+	/*
+	 * Lists
+	 */
+	public List<ContactRow> contactRows {get; set;}
+
+	/*
+	 * Strings
+	 */
+	public String userFeedback {get; set;}
+
+	/*
+	 * Booleans
+	 */
+	public Boolean hasNewRows {get; set;}
+
+	/*
+	 * Init
+	 */
+	{
+		contactRows = new List<ContactRow> ();
+		hasNewRows = false;
+	}
+
+	/*
+		Constructor method
+		--
+		The constructor
+	*/
+	public ContactRelatedListController (ApexPages.StandardController sc) {
+		// Get the Id from the Account record the related VisualForce page is currently on
+		this.accountId = (Id)sc.getId ();
+
+		// load data
+		load ();
+	}
+
+	/*
+		load
+		--
+		Init mathod to load / refresh all data
+	*/
+	public void load () {
+		// Clear the ContactRows list to avoid duplicates
+		ContactRows.clear ();
+
+		// Account to hold the Account record from the StandardController context
+		Account accountContext;
+
+		// If it is a valid Id, query the parent Account
+		if (accountId != null)
+			accountContext = queryParentAccount ();
+
+		// Check if there are any Contact records under the parent Account, if there are then add each one to the list of ContactRows
+		if (!accountContext.Contacts.isEmpty ())
+			for (Contact contactContext : accountContext.Contacts)
+				contactRows.add (new ContactRow (false, contactContext, false));
+	}
+
+	/*
+		queryParentAccount
+		--
+		Util method to return the Account in which the related VisualForce page is displayed, along with the child Contact records
+	*/
+	public Account queryParentAccount () {
+		return [SELECT Id, (SELECT Id, FirstName, LastName, Phone, Email FROM Contacts) FROM Account WHERE Id =: accountId];
+	}
+
+	/*
+		deleteSelectedContacts
+		--
+		Method to delete all selected Contact records within the list of 'ContactRow'
+	*/
+	public void deleteSelectedContacts () {
+		List<Contact> contactsToDelete = new List<Contact> ();
+
+		// Loop over each index in the ContactRow list and filter out the selected rows
+		for (ContactRow rowContext : ContactRows)
+			if (rowContext.isSelected)
+				contactsToDelete.add (rowContext.contactContext);
+
+		// Check to see if any were selected, if so delete them
+		if (!contactsToDelete.isEmpty ()) {
+			Database.delete (contactsToDelete);
+			userFeedback = 'Contacts Deleted Successfuly!';
+		} else {
+			userFeedback = 'No Contacts Selected!';
+		}
+
+		// Re-query the Contact records under the parent Account
+		load ();
+
+	}
+
+	/*
+		addNewContactRow
+		--
+		Method to insert a new Contact under the Account
+	*/
+	public void addNewContactRow () {
+		// Create a new ContactRow and default the parent Account to be the Account the StandardController context is referencing
+		ContactRows.add (new ContactRow (false, new Contact (AccountId = accountId), true));
+
+		// Set hasNewRows to true and show the additional button
+		if (!hasNewRows)
+			hasNewRows = true;
+	}
+
+	/*
+		insertNewContact
+		--
+		Method to read the new Contact and insert it under the Account
+	*/
+	public void insertNewContact () {
+		List<Contact> contactsToInsert = new List<Contact> ();
+
+		// Loop over the ContactRows and insert the new Contact
+		for (ContactRow rowContext : ContactRows)
+			if (rowContext.isEdit)
+				contactsToInsert.add (rowContext.contactContext);
+
+		// Insert the new Contact if there are any new ones
+		if (!contactsToInsert.isEmpty ())
+			Database.insert (contactsToInsert);
+
+		// Reset hasNewRows so the additional add button is not shown
+		if (hasNewRows)
+			hasNewRows = false;
+
+		// Re-query the Contact records under the parent Account
+		load ();
+	}
+
+	/*
+		ContactRow
+		--
+		Wrapper Class to hold the Contact and checkbox for selection from the VisualForce page
+	*/
+	public Class ContactRow {
+		
+		/*
+		 * SObjects
+		 */
+		public Contact contactContext {get; set;}
+		
+		/*
+		 * Booleans
+		 */
+		public Boolean isSelected {get; set;}
+		public Boolean isEdit {get; set;}
+
+		/*
+			Constructor method
+			--
+			The constructor
+		*/
+		public ContactRow (Boolean isSelected, Contact contactContext, Boolean isEdit) {
+			this.isSelected = isSelected;
+			this.contactContext = contactContext;
+			this.isEdit = isEdit;
+		}
+
+	}
+
+}
