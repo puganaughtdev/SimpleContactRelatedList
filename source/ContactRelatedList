@@ -20,11 +20,11 @@
 				<br />
 
 				<!-- The mass delete button -->
-				<apex:commandLink value="Delete Selected" action="{!deleteSelectedContacts}" reRender="parentPanel" styleClass="waves-effect waves-light btn" />&nbsp;&nbsp;
+				<apex:commandLink value="Delete Selected" action="{!deleteSelectedContacts}" reRender="parentPanel" styleClass="waves-effect waves-light btn red lighten-2" />&nbsp;&nbsp;
 				<!-- The create new ContactRow button -->
-				<apex:commandLink value="Create Contact" action="{!addNewContactRow}" reRender="parentPanel" styleClass="waves-effect waves-light btn" rendered="{!IF (hasNewRows==true, false, true)}" />&nbsp;&nbsp;
+				<apex:commandLink value="Create Contact" action="{!addNewContactRow}" reRender="parentPanel" styleClass="waves-effect waves-light btn lighten-2" rendered="{!IF (hasNewRows==true, false, true)}" />&nbsp;&nbsp;
 				<!-- The insert new Contact button -->
-				<apex:commandLink value="Insert new Contacts" action="{!insertNewContact}" reRender="parentPanel" styleClass="waves-effect waves-light btn" rendered="{!IF (hasNewRows==true, true, false)}" />
+				<apex:commandLink value="Insert new Contacts" action="{!insertNewContact}" reRender="parentPanel" styleClass="waves-effect waves-light btn orange lighten-2" rendered="{!IF (hasNewRows==true, true, false)}" />
 
 				<!-- The table of results -->
 				<apex:dataTable value="{!ContactRows}" var="row" styleClass="table bordered striped">
