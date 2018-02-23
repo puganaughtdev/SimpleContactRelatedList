@@ -1,0 +1,73 @@
+<!-- @Who    Daniel Edwards (PuganaughtDev) -->
+<!-- @What   VisualForce page to display a table of related Contact records held within a selectable Wrapper Class -->
+<!-- @When   21/02/2018 -->
+
+<apex:page standardController="Account" extensions="ContactRelatedListController" applyHtmlTag="true" standardStylesheets="false" sidebar="false" showHeader="false">
+	<head>
+		<meta charset="utf-8" />
+    	<meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+    	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css" />
+	</head>
+
+	<!-- Set the height to match the height set within the page layout -->
+	<body style="height: 500px;">
+		<apex:form >
+			<apex:outputPanel id="parentPanel">
+				<!-- User feedback -->
+				<apex:outputText value="{!userFeedback}" />
+
+				<br />
+				<br />
+
+				<!-- The mass delete button -->
+				<apex:commandLink value="Delete Selected" action="{!deleteSelectedContacts}" reRender="parentPanel" styleClass="waves-effect waves-light btn" />&nbsp;&nbsp;
+				<!-- The create new ContactRow button -->
+				<apex:commandLink value="Create Contact" action="{!addNewContactRow}" reRender="parentPanel" styleClass="waves-effect waves-light btn" rendered="{!IF (hasNewRows==true, false, true)}" />&nbsp;&nbsp;
+				<!-- The insert new Contact button -->
+				<apex:commandLink value="Insert new Contacts" action="{!insertNewContact}" reRender="parentPanel" styleClass="waves-effect waves-light btn" rendered="{!IF (hasNewRows==true, true, false)}" />
+
+				<!-- The table of results -->
+				<apex:dataTable value="{!ContactRows}" var="row" styleClass="table bordered striped">
+					<!-- The title of the dataTable -->
+					<apex:facet name="header">Related Contacts</apex:facet>
+
+					<!-- The checkbox users can select to indicate that the Contact records are to be deleted -->
+					<apex:column >
+						<apex:inputCheckbox id="selected" value="{!row.isSelected}" />
+						<apex:outputLabel for="selected"></apex:outputLabel>
+					</apex:column>
+
+					<!-- Each of the below columns has a read or write version, if the user clicks 'Create Contact' then a new empty row is added with input fields, based on the 'isEdit' Boolean in the wrapper Class -->
+					<apex:column >
+						<apex:facet name="header">First Name</apex:facet>
+						<apex:outputText value="{!row.contactContext.FirstName}" rendered="{!IF (row.isEdit==false, true, false)}" />
+						<apex:inputField value="{!row.contactContext.FirstName}" rendered="{!IF (row.isEdit==true, true, false)}" />
+					</apex:column>
+
+					<apex:column >
+						<apex:facet name="header">Last Name</apex:facet>
+						<apex:outputText value="{!row.contactContext.LastName}" rendered="{!IF (row.isEdit==false, true, false)}" />
+						<apex:inputField value="{!row.contactContext.LastName}" rendered="{!IF (row.isEdit==true, true, false)}" />
+					</apex:column>
+
+					<apex:column >
+						<apex:facet name="header">Phone</apex:facet>
+						<apex:outputText value="{!row.contactContext.Phone}" rendered="{!IF (row.isEdit==false, true, false)}" />
+						<apex:inputField value="{!row.contactContext.Phone}" rendered="{!IF (row.isEdit==true, true, false)}" />
+					</apex:column>
+
+					<apex:column >
+						<apex:facet name="header">Email</apex:facet>
+						<apex:outputText value="{!row.contactContext.Email}" rendered="{!IF (row.isEdit==false, true, false)}" />
+						<apex:inputField value="{!row.contactContext.Email}" rendered="{!IF (row.isEdit==true, true, false)}" />
+					</apex:column>
+
+				</apex:dataTable>
+			</apex:outputPanel>
+		</apex:form>
+
+		<!-- Import Javascript -->
+		<apex:includeScript value="https://code.jquery.com/jquery-3.2.1.min.js" />
+		<apex:includeScript value="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js" />
+	</body>
+</apex:page>
